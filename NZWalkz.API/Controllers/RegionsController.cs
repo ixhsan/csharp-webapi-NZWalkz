@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using NZWalkz.API.Data;
 using NZWalkz.API.Models.Domain;
+using NZWalkz.API.Models.DTO;
 
 namespace NZWalkz.API.Controllers
 {
@@ -11,15 +12,15 @@ namespace NZWalkz.API.Controllers
     {
 
         /// <summary>
-        /// Get All Regions
+        /// GET ALL REGIONS
+        /// GET: http:localhost:port/api/Regions
         /// </summary>
         /// <returns></returns>
-        /// GET: http:localhost:port/api/regions
         [HttpGet]
         public IActionResult GetAllRegions()
         {
-            // dummy
-            //var regions = new List<Region>
+            // in-memory data example
+            //var regionsDomain = new List<Region>
             //{
             //    new Region
             //    {
@@ -37,23 +38,88 @@ namespace NZWalkz.API.Controllers
             //    }
             //};
 
-            var regions = DbContext.Regions.ToList();
+            //Get Data from DB - Domain Models
+            var regionsDomain = DbContext.Regions.ToList();
 
-            return Ok(regions);
+            // Map Domain Model to DTOs
+            var regionsDto = new List<RegionDto>();
+
+            foreach(var region in regionsDomain)
+            {
+                regionsDto.Add(new RegionDto()
+                {
+                    Id = region.Id,
+                    Name = region.Name,
+                    Code = region.Code,
+                    RegionImageUrl = region.RegionImageUrl
+                });
+            }
+
+            // Return DTOs
+            return Ok(regionsDto);
         }
 
+        /// <summary>
+        /// GET A SINGLE REGION
+        /// GET: http:localhost:port/api/Regions/:id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id:Guid}")]
         public IActionResult GetRegionById([FromRoute] Guid id)
         {
-            var region = DbContext.Regions.Find(id);
 
-            if (region is null)
+            //var regionDomain = DbContext.Regions.Find(id);
+            // Get Region Domain Model From DB
+            var regionDomain = DbContext.Regions.FirstOrDefault(x => x.Id == id);
+
+            if (regionDomain is null)
             {
                 return NotFound();
             }
 
-            return Ok(region);
+            // Map/Convert Region Domain Model to Region DTO
+            var regionDto = new RegionDto()
+            {
+                Id = regionDomain.Id,
+                Name = regionDomain.Name,
+                Code = regionDomain.Code,
+                RegionImageUrl = regionDomain.RegionImageUrl
+            };
+
+            return Ok(regionDto);
+        }
+
+        /// <summary>
+        /// CREATE REGION
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
+        {
+            // Map or Convert DTO to Domain Model
+            var regionDomain = new Region()
+            {
+                Code = addRegionRequestDto.Code,
+                Name = addRegionRequestDto.Name,
+                RegionImageUrl = addRegionRequestDto.RegionImageUrl
+            };
+
+            // Use Domain Model to Create Region
+            DbContext.Regions.Add(regionDomain);
+            DbContext.SaveChanges();
+
+            // Map Domain Model back to DTO
+            var regionDto = new RegionDto()
+            {
+                Id = regionDomain.Id,
+                Name = regionDomain.Name,
+                Code = regionDomain.Code,
+                RegionImageUrl = regionDomain.RegionImageUrl
+            };
+
+            return CreatedAtAction(nameof(GetRegionById), new {id = regionDto.Id}, regionDto);
         }
     }
 }
