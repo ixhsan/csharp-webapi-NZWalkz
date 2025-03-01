@@ -10,7 +10,7 @@ namespace NZWalkz.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RegionsController(NZWalkzDbContext DbContext, IRegionRepository regionRepository, IMapper mapper) : Controller
+    public class RegionsController(IRegionRepository regionRepository, IMapper mapper) : Controller
     {
 
         /// <summary>
@@ -21,41 +21,9 @@ namespace NZWalkz.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // in-memory data example
-            //var regionsDomain = new List<Region>
-            //{
-            //    new Region
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        Name = "Auckland Region",
-            //        Code = "AKL",
-            //        RegionImageUrl = "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/179000/179003-North-Island.jpg"
-            //    },
-            //    new Region
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        Name = "Wellington Region",
-            //        Code = "WLG",
-            //        RegionImageUrl = "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/179000/179180-Wellington.jpg"
-            //    }
-            //};
 
             //Get Data from DB - Domain Models
             var regionsDomain = await regionRepository.GetAllAsync();
-
-            // Map Domain Model to DTOs
-            //var regionsDto = new List<RegionDto>();
-
-            //foreach (var region in regionsDomain)
-            //{
-            //    regionsDto.Add(new RegionDto()
-            //    {
-            //        Id = region.Id,
-            //        Name = region.Name,
-            //        Code = region.Code,
-            //        RegionImageUrl = region.RegionImageUrl
-            //    });
-            //}
 
             // Map Domain Model to DTOs using mapper -> List<RegionDto> as the end type
             var regionsDto = mapper.Map<List<RegionDto>>(regionsDomain);
@@ -84,15 +52,6 @@ namespace NZWalkz.API.Controllers
                 return NotFound();
             }
 
-            // Map/Convert Region Domain Model to Region DTO
-            //var regionDto = new RegionDto()
-            //{
-            //    Id = regionDomain.Id,
-            //    Name = regionDomain.Name,
-            //    Code = regionDomain.Code,
-            //    RegionImageUrl = regionDomain.RegionImageUrl
-            //};
-
             // Map/Convert Region Domain Model to Region DTO using AutoMapper
             var regionDto = mapper.Map<RegionDto>(regionDomain);
 
@@ -107,13 +66,6 @@ namespace NZWalkz.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
-            // Map or Convert DTO to Domain Model
-            //var regionDomain = new Region()
-            //{
-            //    Code = addRegionRequestDto.Code,
-            //    Name = addRegionRequestDto.Name,
-            //    RegionImageUrl = addRegionRequestDto.RegionImageUrl
-            //};
 
             // Map or Convert DTO to Domain Model using AutoMapper
             var regionDomain = mapper.Map<Region>(addRegionRequestDto);
@@ -142,14 +94,6 @@ namespace NZWalkz.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            // Map DTO to Domain Model
-            //var regionDomain = new Region
-            //{
-            //    Id = id,
-            //    Name = updateRegionRequestDto.Name,
-            //    Code = updateRegionRequestDto.Code,
-            //    RegionImageUrl = updateRegionRequestDto.RegionImageUrl
-            //};
 
             // Map or Convert DTO to Domain Model using AutoMapper
             var regionDomain = mapper.Map<Region>(updateRegionRequestDto);
@@ -186,15 +130,6 @@ namespace NZWalkz.API.Controllers
             {
                 return NotFound();
             }
-
-            // Return Deleted region back
-            //var regionDto = new RegionDto()
-            //{
-            //    Id = regionDomainModel.Id,
-            //    Name = regionDomainModel.Name,
-            //    Code = regionDomainModel.Code,
-            //    RegionImageUrl = regionDomainModel.RegionImageUrl
-            //};
 
             // Map or Convert DTO to Domain Model using AutoMapper
             var regionDto = mapper.Map<RegionDto>(regionDomainModel);
